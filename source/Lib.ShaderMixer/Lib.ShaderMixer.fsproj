@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);CAPTURE_OPENGL_LOGS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="ShaderSources.fs" />
+    <Compile Include="OpenGLMath.fs" />
+    <Compile Include="ShaderMixer.fs" />
+    <Compile Include="AudioMixer.fs" />
+    <Compile Include="DistanceField.fs" />
+    <Compile Include="Scripting.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />
+    <PackageReference Include="Silk.NET.OpenAL" Version="2.21.0" />
+  </ItemGroup>
+
+</Project>
