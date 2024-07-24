@@ -122,6 +122,12 @@ module Program =
         | None        -> ()
         | Some state  ->
           state.GL.Viewport nsz
+          let sizef = Vector2 (float32 nsz.X, float32 nsz.Y)
+          appState <-
+            { 
+              state with 
+                OpenGLMixer = Mixer.resizeOpenGLMixer sizef state.OpenGLMixer
+            } |> Some
 
       let onRender (delta : float) =
         match appState with
