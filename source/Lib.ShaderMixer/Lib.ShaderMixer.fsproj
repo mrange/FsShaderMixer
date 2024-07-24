@@ -15,9 +15,10 @@
     <Compile Include="ShaderSources.fs" />
     <Compile Include="OpenGLMath.fs" />
     <Compile Include="ShaderMixer.fs" />
-    <Compile Include="AudioMixer.fs" />
     <Compile Include="DistanceField.fs" />
     <Compile Include="Scripting.fs" />
+    <Compile Include="AudioMixer.fs" />
+    <Compile Include="Playback.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />

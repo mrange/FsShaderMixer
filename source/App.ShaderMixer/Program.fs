@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses
 *)
 
 namespace App.ShaderMixer
+#nowarn "9"
 
 open ImGuiNET
 open Silk.NET
@@ -30,8 +31,10 @@ open System
 open System.Diagnostics
 open System.Globalization
 open System.Numerics
+open System.Text
 
 open FSharp.Core.Printf
+open FSharp.NativeInterop
 
 open Lib.ShaderMixer
 
@@ -70,14 +73,32 @@ module Program =
 
       let mixer = Setup.createMixer ()
 
+      let endTime = mixer.BeatToTime (float32 mixer.LengthInBeats)
+
       let mutable options = WindowOptions.Default
       options.Title <- "FsShaderMixer"
       options.Size <- Vector2D<int> (1920, 1080)
       use window = Window.Create options
 
-      let sw = Stopwatch.StartNew ()
+      let playBack = Playback None
+      let mutable frameNo  = 0
 
       let mutable appState = None
+
+      let labelFloat (lbl : string) (v : float32) =
+        let bufferLen   = 64
+        let buffer      : nativeptr<char> = NativePtr.stackalloc bufferLen
+        let format      = "0.00"
+
+        let bufferSpan  = Span<char> (NativePtr.toVoidPtr buffer, bufferLen)
+        let formatSpan  = format.AsSpan ()
+        let lblSpan     = lbl.AsSpan ()
+        let mutable written = 0
+        if v.TryFormat (bufferSpan, &written, formatSpan, culture) then
+          let valueSpan = bufferSpan.Slice (0, written)
+          ImGui.LabelText (lblSpan, valueSpan)
+        else
+          ImGui.LabelText (lbl, "Failed to format")
 
       let disposeAppState () =
         match appState with
@@ -137,30 +158,39 @@ module Program =
           state.GL.ClearColor (0.5F, 0.25F, 0.75F, 1.F)
           state.GL.Clear ((uint) ClearBufferMask.ColorBufferBit)
 
-          let time = float32 sw.ElapsedMilliseconds/1000.F
+          let time = playBack.Time ()
           Mixer.renderOpenGLMixer time 0 state.OpenGLMixer
+
+          state.Position  <- playBack.Time ()
+          state.Pitch     <- playBack.Pitch ()
 
           state.ImGui.Update (float32 delta)
 
-          //ImGuiNET.ImGui.ShowDemoWindow()
           let isVisible = ImGui.Begin "Shader Mixer Controls"
           try
             if isVisible then
-              ImGui.LabelText ("BPM"  , "142")
-              ImGui.LabelText ("Beat" , "0.00")
-              if ImGui.SliderFloat ("Position", &state.Position, 0.F, 120.F) then
-                ()
+              labelFloat "BPM"  mixer.BPM
+              labelFloat "Beat" (mixer.TimeToBeat state.Position)
+              if ImGui.SliderFloat ("Position", &state.Position, 0.F, endTime) then
+                playBack.SetTime state.Position |> ignore
+
+              if ImGui.IsItemActivated () then
+                playBack.StartSeeking ()
+              elif not (ImGui.IsItemActive ()) then
+                playBack.StopSeeking ()
+
               if ImGui.SliderFloat ("Pitch"   , &state.Pitch   , 0.F, 3.F) then
-                ()
+                playBack.SetPitch state.Pitch
 
               if ImGui.Button "Play" then
-                ()
+                playBack.Play ()
               ImGui.SameLine ()
               if ImGui.Button "Pause" then
-                ()
+                playBack.Pause ()
               ImGui.SameLine ()
               if ImGui.Button "Reset Pitch" then
-                ()
+                state.Pitch <- 1.F
+                playBack.SetPitch 1.F
 
 
               ()
