@@ -80,7 +80,11 @@ module Program =
       options.Size <- Vector2D<int> (1920, 1080)
       use window = Window.Create options
 
-      let playBack = Playback None
+      let audioMixer = Setup.createAudioMixer ()
+
+      let audioMixer = AudioMixer.setupOpenALAudioMixer audioMixer
+
+      let playBack = Playback (Some audioMixer)
       let mutable frameNo  = 0
 
       let mutable appState = None

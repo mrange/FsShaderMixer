@@ -16,13 +16,17 @@
     <Compile Include="OpenGLMath.fs" />
     <Compile Include="ShaderMixer.fs" />
     <Compile Include="DistanceField.fs" />
-    <Compile Include="Scripting.fs" />
     <Compile Include="AudioMixer.fs" />
     <Compile Include="Playback.fs" />
+    <Compile Include="ImageIO.fs" />
+    <Compile Include="AudioIO.fs" />
+    <Compile Include="Scripting.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />
     <PackageReference Include="Silk.NET.OpenAL" Version="2.21.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
+    <PackageReference Include="NAudio.Core" Version="2.2.1" />
   </ItemGroup>
 
 </Project>

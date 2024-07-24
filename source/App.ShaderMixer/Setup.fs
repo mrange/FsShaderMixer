@@ -23,19 +23,40 @@ open Lib.ShaderMixer
 open Scripting
 
 module Setup =
+  let createAudioMixer () : AudioMixer =
+    AudioIO.loadFromWavFile @"D:\assets\virgill_-_hyperbased_-_omg_its_a_cube_-_amigaremix_02106.wav"
+
   let createMixer () : Mixer = 
     let gravitySucksID  = SceneID "gravitySucks"
-
     let gravitySucks    = basicScene ShaderSources.gravitySucks
 
+    let crewID          = BitmapImageID         "crew"
+    let crew            = ImageIO.loadFromFile  R8 @"D:\assets\impulse-members-distance.png"
+
+    let imageID         = SceneID "image"
+    let image           = basicScene ShaderSources.image
+    let image           =
+      { image with
+          Image =
+            { image.Image with
+                Channel0 = basicImageBufferChannel' crewID
+            }
+      }
+
+    let images  = 
+      [|
+        crewID, crew
+      |] |> Map.ofArray
+    
     {
-      NamedBitmapImages = Map.empty
+      NamedBitmapImages = images
       NamedPresenters   = defaultPresenters
       NamedScenes       =
         [|
           blackSceneID    , blackScene
           redSceneID      , redScene
           gravitySucksID  , gravitySucks
+          imageID         , image
         |] |> Map.ofArray
       BPM           = 142.F
       LengthInBeats = 576
