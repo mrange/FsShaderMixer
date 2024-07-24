@@ -16,7 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses
 *)
 
-module internal Lib.ShaderMixer.ShaderSources
+namespace Lib.ShaderMixer
+
+module internal ShaderSources =
   let vertexShader =
     """#version 300 es
 
@@ -73,7 +75,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   let fragmentShaderFaderPresenter = """
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec2 q = fragCoord/iResolution.xy;
-  q.y = 1. - q.y;
+  //q.y = 1. - q.y;
   vec3 col0 = texture(iChannel0, q).xyz;
   vec3 col1 = texture(iChannel1, q).xyz;
   fragColor = vec4(mix(col0, col1, iMix), 1.);

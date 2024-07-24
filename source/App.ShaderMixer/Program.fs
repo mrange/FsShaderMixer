@@ -27,41 +27,27 @@ open Silk.NET.OpenGL.Extensions.ImGui
 open Silk.NET.Windowing
 
 open System
+open System.Diagnostics
 open System.Globalization
+open System.Numerics
 
 open FSharp.Core.Printf
+
+open Lib.ShaderMixer
+
+open MixerLog
 
 type AppState =
   {
     GL                : GL
     Input             : IInputContext
     ImGui             : ImGuiController
+    OpenGLMixer       : OpenGLMixer
     mutable Position  : float32
     mutable Pitch     : float32
   }
 
 module Program =
-
-  let log (cc : ConsoleColor) (prelude : string) (msg : string) : unit =
-    let occ = Console.ForegroundColor
-
-    try
-      Console.ForegroundColor <- cc
-      Console.WriteLine (prelude + msg)
-    finally
-      Console.ForegroundColor <- occ
-
-  let bad     msg = log ConsoleColor.Red    "BAD " msg
-  let warn    msg = log ConsoleColor.Yellow "WARN" msg
-  let info    msg = log ConsoleColor.Gray   "INFO" msg
-  let good    msg = log ConsoleColor.Green  "GOOD" msg
-  let hili    msg = log ConsoleColor.Cyan   "HILI" msg
-
-  let badf    fmt = kprintf bad  fmt
-  let warnf   fmt = kprintf warn fmt
-  let infof   fmt = kprintf info fmt
-  let goodf   fmt = kprintf good fmt
-  let hilif   fmt = kprintf hili fmt
 
   let dispose nm (d : #IDisposable) : unit =
     if not (isNull d) then
@@ -82,10 +68,14 @@ module Program =
 
       Environment.CurrentDirectory <- AppDomain.CurrentDomain.BaseDirectory
 
+      let mixer = Setup.createMixer ()
+
       let mutable options = WindowOptions.Default
       options.Title <- "FsShaderMixer"
       options.Size <- Vector2D<int> (1920, 1080)
       use window = Window.Create options
+
+      let sw = Stopwatch.StartNew ()
 
       let mutable appState = None
 
@@ -112,13 +102,18 @@ module Program =
         let fontBuilt = io.Fonts.Build ()
         assert fontBuilt
         *)
+
+        let size = window.FramebufferSize
+        let sizef = Vector2 (float32 size.X, float32 size.Y)
+
         appState <-
           {
-            GL        = gl
-            Input     = input
-            ImGui     = imgui
-            Position  = 0.F
-            Pitch     = 1.F
+            GL          = gl
+            Input       = input
+            ImGui       = imgui
+            OpenGLMixer = Mixer.setupOpenGLMixer gl sizef mixer
+            Position    = 0.F
+            Pitch       = 1.F
           } |> Some
 
 
@@ -132,8 +127,12 @@ module Program =
         match appState with
         | None        -> ()
         | Some state  ->
+
           state.GL.ClearColor (0.5F, 0.25F, 0.75F, 1.F)
           state.GL.Clear ((uint) ClearBufferMask.ColorBufferBit)
+
+          let time = float32 sw.ElapsedMilliseconds/1000.F
+          Mixer.renderOpenGLMixer time 0 state.OpenGLMixer
 
           state.ImGui.Update (float32 delta)
 

@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="MixerLog.fs" />
     <Compile Include="ShaderSources.fs" />
     <Compile Include="OpenGLMath.fs" />
     <Compile Include="ShaderMixer.fs" />

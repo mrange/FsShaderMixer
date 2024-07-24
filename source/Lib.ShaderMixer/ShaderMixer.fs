@@ -30,6 +30,8 @@ open Silk.NET.OpenGL
 open FSharp.NativeInterop
 open FSharp.Core.Printf
 
+open MixerLog
+
 type BitmapImageFormat =
   | RGBA8
   | R8
@@ -326,9 +328,6 @@ module Mixer =
 
     let nullVoidPtr = NativePtr.toVoidPtr (NativePtr.nullPtr : byte nativeptr)
 
-    let trace (msg : string) : unit = Trace.WriteLine ("Lib.ShaderMixer: " + msg)
-    let tracef fmt                  = kprintf trace fmt
-
     let vertices : Vertex array =
         let nv x y z u v : Vertex =
           let mutable vv = Vertex ()
@@ -351,17 +350,19 @@ module Mixer =
         uint16 2
       |]
 
-    let checkGL (gl : GL) : unit =
+    let rec checkGL (gl : GL) : unit =
 
       let err = gl.GetError ()
       if err <> GLEnum.NoError then
-        failwithf "OpenGL is in an error state: %A" err
+        badf "OpenGL is in an error state: %A" err
+#if DEBUG
+        Debugger.Break ()
+#endif
+        checkGL gl
 
     let assertGL (gl : GL) : unit =
-
 #if DEBUG
-      let err = gl.GetError ()
-      assert (err = GLEnum.NoError)
+      checkGL gl
 #else
       ()
 #endif
@@ -378,7 +379,7 @@ module Mixer =
           (userParam  : nativeint   )
           : unit = 
           let messageString = Marshal.PtrToStringAnsi (message, length)
-          tracef "OpenGL Debug: %s" messageString
+          warnf "OpenGL Debug: %s" messageString
 
         let debugProcD = DebugProc debugProc
         do
@@ -899,7 +900,6 @@ module Mixer =
         gl.TexParameter (GLEnum.Texture2D, GLEnum.TextureMinFilter, int GLEnum.Linear)
         gl.TexParameter (GLEnum.Texture2D, GLEnum.TextureMagFilter, int GLEnum.Linear)
       checkGL gl
-      checkGL gl
 
       match wrap with
       | Clamp   ->
@@ -911,7 +911,6 @@ module Mixer =
       | MirroredRepeat ->
         gl.TexParameter (GLEnum.Texture2D  , GLEnum.TextureWrapS, int GLEnum.MirroredRepeat)
         gl.TexParameter (GLEnum.Texture2D  , GLEnum.TextureWrapT, int GLEnum.MirroredRepeat)
-      checkGL gl
       checkGL gl
 
       gl.Uniform1 (loc.UniformLocationID, textureUnitNo)
@@ -1021,10 +1020,8 @@ module Mixer =
 
       let fboStatus = gl.CheckFramebufferStatus (GLEnum.Framebuffer)
 
-      if fboStatus <> GLEnum.Framebuffer then
-        tracef "FBO Status: %A" fboStatus
-
-
+      if fboStatus <> GLEnum.FramebufferComplete then
+        badf "FBO Status: %A" fboStatus
 
       gl.UseProgram sceneBuffer.Program.ProgramID
       checkGL gl
@@ -1155,7 +1152,7 @@ module Mixer =
     (mixer      : Mixer       )
     : OpenGLMixer =
 #if DEBUG
-    trace "setupOpenGLMixer called"
+    info "setupOpenGLMixer called"
 #endif
 
     checkGL gl
@@ -1167,9 +1164,6 @@ module Mixer =
     use _ = new OpenGLDebugMode (gl)
 #endif
 #endif
-
-    let oldTex = gl.GetInteger GLEnum.TextureBinding2D
-    checkGL gl
 
     let frameBuffer =
       {
@@ -1256,7 +1250,7 @@ module Mixer =
     : unit =
 
 #if DEBUG
-    trace "tearDownOpenGLMixer called"
+    info "tearDownOpenGLMixer called"
 #endif
 
     let gl    = mixer.Gl
@@ -1302,7 +1296,7 @@ module Mixer =
     (mixer      : OpenGLMixer ) : OpenGLMixer =
 
 #if DEBUG
-    trace "resizeOpenGLMixer called"
+    info "resizeOpenGLMixer called"
 #endif
 
     let gl    = mixer.Gl
@@ -1354,6 +1348,8 @@ module Mixer =
     let stage0    = mixer.Stage0
     let stage1    = mixer.Stage1
 
+    let oldFbo = gl.GetInteger GLEnum.FramebufferBinding
+
     (*
     gl.Viewport (view.X, view.Y, view.Width, view.Height)
     checkGL gl
@@ -1380,7 +1376,7 @@ module Mixer =
     gl.FramebufferTexture2D (GLEnum.Framebuffer, GLEnum.ColorAttachment0, GLEnum.Texture2D, 0u, 0)
     checkGL gl
 
-    gl.BindFramebuffer (GLEnum.Framebuffer, 0u)
+    gl.BindFramebuffer (GLEnum.Framebuffer, uint32 oldFbo)
     checkGL gl
 
     renderOpenGLMixerPresenter mixer mix time frameNo stage0 stage1 presenter
