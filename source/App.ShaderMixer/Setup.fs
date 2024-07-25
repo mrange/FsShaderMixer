@@ -18,11 +18,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses
 
 namespace App.ShaderMixer
 
-open Lib.ShaderMixer
-
-open Scripting
-
 module Setup =
+  open Lib.ShaderMixer
+  open Scripting
+
   let createAudioMixer () : AudioMixer =
     AudioIO.loadFromWavFile @"D:\assets\virgill_-_hyperbased_-_omg_its_a_cube_-_amigaremix_02106.wav"
 

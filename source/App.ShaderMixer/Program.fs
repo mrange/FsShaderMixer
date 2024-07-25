@@ -19,38 +19,37 @@ along with this program.  If not, see <https://www.gnu.org/licenses
 namespace App.ShaderMixer
 #nowarn "9"
 
-open ImGuiNET
-open Silk.NET
-open Silk.NET.Maths
-open Silk.NET.OpenGL
-open Silk.NET.Input
-open Silk.NET.OpenGL.Extensions.ImGui
-open Silk.NET.Windowing
-
-open System
-open System.Diagnostics
-open System.Globalization
-open System.Numerics
-open System.Text
-
-open FSharp.Core.Printf
-open FSharp.NativeInterop
-
-open Lib.ShaderMixer
-
-open MixerLog
-
-type AppState =
-  {
-    GL                : GL
-    Input             : IInputContext
-    ImGui             : ImGuiController
-    OpenGLMixer       : OpenGLMixer
-    mutable Position  : float32
-    mutable Pitch     : float32
-  }
-
 module Program =
+  open ImGuiNET
+  open Silk.NET
+  open Silk.NET.Maths
+  open Silk.NET.OpenGL
+  open Silk.NET.Input
+  open Silk.NET.OpenGL.Extensions.ImGui
+  open Silk.NET.Windowing
+
+  open System
+  open System.Diagnostics
+  open System.Globalization
+  open System.Numerics
+  open System.Text
+
+  open FSharp.NativeInterop
+
+  open Lib.ShaderMixer
+
+  open MixerLog
+
+  type AppState =
+    {
+      GL                : GL
+      Input             : IInputContext
+      ImGui             : ImGuiController
+      OpenGLMixer       : OpenGLMixer
+      mutable Position  : float32
+      mutable Pitch     : float32
+    }
+
 
   let dispose nm (d : #IDisposable) : unit =
     if not (isNull d) then
