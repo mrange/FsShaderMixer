@@ -20,12 +20,28 @@ namespace App.ShaderMixer
 
 module Setup =
   open Lib.ShaderMixer
+  open SixLabors.ImageSharp
+
   open Scripting
 
   let createAudioMixer () : AudioMixer =
     AudioIO.loadFromWavFile @"D:\assets\virgill_-_hyperbased_-_omg_its_a_cube_-_amigaremix_02106.wav"
 
-  let createMixer () : Mixer = 
+  let createMixer () : Mixer =
+    let fontCollection  = 
+      ImageIO.createFontCollection 
+        [|
+          @"D:\assets\gravedigger.ttf"
+        |]
+    let fontFamily  = fontCollection.["GRAVEDIGGER PERSONAL USE"]
+    let font        = fontFamily.CreateFont (4.F*96.F)
+
+    use textImage = ImageIO.createImageL8 1024 1024
+    
+    ImageIO.renderText textImage font 0.F 0.F "Hello"
+
+    textImage.SaveAsPng @"D:\assets\text.png"
+
     let gravitySucksID  = SceneID "gravitySucks"
     let gravitySucks    = basicScene ShaderSources.gravitySucks
 

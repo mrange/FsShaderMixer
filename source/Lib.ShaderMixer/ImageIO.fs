@@ -19,9 +19,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses
 namespace Lib.ShaderMixer
 
 module ImageIO =
+  open SixLabors.Fonts
   open SixLabors.ImageSharp
-  open SixLabors.ImageSharp.PixelFormats
+  open SixLabors.ImageSharp.Drawing
+  open SixLabors.ImageSharp.Drawing.Processing
   open SixLabors.ImageSharp.Formats.Png
+  open SixLabors.ImageSharp.PixelFormats
+  open SixLabors.ImageSharp.Processing
 
   let loadFromFile
     (format       : BitmapImageFormat )
@@ -67,5 +71,19 @@ module ImageIO =
     | R8    -> 
       use image = Image.LoadPixelData<L8> (bitmapImage.Bits, int bitmapImage.Width, int bitmapImage.Height)
       image.SaveAsPng fileName
-  
 
+  let createImageL8 width height : Image<L8>=
+    new Image<L8> (width, height)
+
+  let createFontCollection (fontPaths : string array) : Map<string, FontFamily> = 
+    let fc = FontCollection ()
+    let ra = ResizeArray fontPaths.Length
+    for fontPath in fontPaths do
+      let ff = fc.Add fontPath
+      ra.Add (ff.Name, ff)
+    ra |> Map.ofSeq
+
+  let renderText (image : Image<L8>) (font : Font) x y (text : string) : unit =
+    let mutator (ctx : IImageProcessingContext) = 
+      ignore <| ctx.DrawText (text, font, Pens.Solid Color.White, PointF (x, y))
+    image.Mutate mutator
