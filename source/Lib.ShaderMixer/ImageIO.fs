@@ -52,6 +52,7 @@ module ImageIO =
         }
     image.Validate ()
     image
+
   let saveAsPng 
     (bitmapImage  : MixerBitmapImage)
     (fileName     : string          )
