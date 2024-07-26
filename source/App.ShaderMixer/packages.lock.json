@@ -4,9 +4,9 @@
     "net8.0": {
       "FSharp.Core": {
         "type": "Direct",
-        "requested": "[8.0.400-beta.24321.3, )",
-        "resolved": "8.0.400-beta.24321.3",
-        "contentHash": "iRTyTSKHMIHuq1RYsvEC3Q5/+wrq6J7zcANEpras0+26CR5/GMKSbmlQjF9z6wbS3miQI8/FPbvuygLYAAYeBg=="
+        "requested": "[8.0.301, )",
+        "resolved": "8.0.301",
+        "contentHash": "I94+2zfAhWMJwPzVDFSlsutZvjPkaRvLVipf8b2O4AyzxKUBmevDkUBzcJBqSQNB1Ikig8xdphswoeKrObqx7Q=="
       },
       "ImGui.NET": {
         "type": "Direct",
@@ -260,7 +260,7 @@
       "lib.shadermixer": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[8.0.400-beta.24321.3, )",
+          "FSharp.Core": "[8.0.301, )",
           "NAudio.Core": "[2.2.1, )",
           "Silk.NET.OpenAL": "[2.21.0, )",
           "Silk.NET.OpenGL": "[2.21.0, )",

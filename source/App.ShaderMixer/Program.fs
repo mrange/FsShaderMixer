@@ -88,7 +88,7 @@ module Program =
 
       let mutable appState = None
 
-      let labelFloat (lbl : string) (v : float32) =
+      let labelFloat (lbl : string) (v : float32) : unit =
         let bufferLen   = 64
         let buffer      : nativeptr<char> = NativePtr.stackalloc bufferLen
         let format      = "0.00"
@@ -159,7 +159,7 @@ module Program =
         | Some state  ->
 
           state.GL.ClearColor (0.5F, 0.25F, 0.75F, 1.F)
-          state.GL.Clear ((uint) ClearBufferMask.ColorBufferBit)
+          state.GL.Clear (uint ClearBufferMask.ColorBufferBit)
 
           let time = playBack.Time ()
           Mixer.renderOpenGLMixer time 0 state.OpenGLMixer
@@ -194,9 +194,6 @@ module Program =
               if ImGui.Button "Reset Pitch" then
                 state.Pitch <- 1.F
                 playBack.SetPitch 1.F
-
-
-              ()
           finally
             ImGui.End ()
 
