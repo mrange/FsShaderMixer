@@ -20,17 +20,46 @@ namespace App.ShaderMixer
 
 module Setup =
   open Lib.ShaderMixer
+  open SixLabors.ImageSharp
+
   open Scripting
 
   let createAudioMixer () : AudioMixer =
     AudioIO.loadFromWavFile @"D:\assets\virgill_-_hyperbased_-_omg_its_a_cube_-_amigaremix_02106.wav"
 
-  let createMixer () : Mixer = 
+  let createMixer () : Mixer =
+    let fontCollection  = 
+      ImageIO.createFontCollection 
+        [|
+          @"D:\assets\PermanentMarker-Regular.ttf"
+        |]
+    let fontFamily  = fontCollection.["Permanent Marker"]
+    let font        = fontFamily.CreateFont (128.F)
+
+    use textImage = ImageIO.createSixLaborsImage 1024u 1024u R8
+    
+    ImageIO.renderCenteredText textImage font 0 4 "Jez"
+    ImageIO.renderCenteredText textImage font 1 4 "Glimglam"
+    ImageIO.renderCenteredText textImage font 2 4 "Lance"
+    ImageIO.renderCenteredText textImage font 3 4 "Longshot"
+
+    let textBitmap = ImageIO.toMixerBitmapImage textImage
+    let distanceBitmap = 
+      DistanceField.createDistanceField 
+        128
+        0.25
+        0
+        textBitmap
+    let distanceImage = ImageIO.toSixLaborsImage distanceBitmap
+    ImageIO.resizeInplaceSixLaborsImage distanceImage 256u 256u
+    ImageIO.saveSixLaborsImageAsPng distanceImage @"D:\assets\distance.png"
+    ImageIO.saveSixLaborsImageAsPng textImage @"D:\assets\text.png"
+
     let gravitySucksID  = SceneID "gravitySucks"
     let gravitySucks    = basicScene ShaderSources.gravitySucks
 
-    let crewID          = BitmapImageID         "crew"
-    let crew            = ImageIO.loadFromFile  R8 @"D:\assets\impulse-members-distance.png"
+    let crewID          = BitmapImageID "crew"
+    let crew            = ImageIO.loadMixerBitmapImageFromFile R8 @"D:\assets\impulse-members-distance.png"
 
     let imageID         = SceneID "image"
     let image           = basicScene ShaderSources.image
