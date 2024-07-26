@@ -18,64 +18,105 @@ along with this program.  If not, see <https://www.gnu.org/licenses
 
 namespace Lib.ShaderMixer
 
+open System
+open SixLabors.ImageSharp
+open SixLabors.ImageSharp.PixelFormats
+
+type SixLaborsImage =
+  | ImageL8      of Image<L8>
+  | ImageRgba32  of Image<Rgba32>
+
+  interface IDisposable with
+    member x.Dispose () : unit =
+      match x with
+      | ImageL8      image -> image.Dispose ()
+      | ImageRgba32  image -> image.Dispose ()
+
+  member x.GetImage () : Image =
+    match x with
+    | ImageL8      image -> image :> Image
+    | ImageRgba32  image -> image :> Image
+
 module ImageIO =
   open SixLabors.Fonts
-  open SixLabors.ImageSharp
-  open SixLabors.ImageSharp.Drawing
   open SixLabors.ImageSharp.Drawing.Processing
-  open SixLabors.ImageSharp.Formats.Png
-  open SixLabors.ImageSharp.PixelFormats
   open SixLabors.ImageSharp.Processing
 
-  let loadFromFile
+  let createSixLaborsImage 
+    (width        : uint32            )
+    (height       : uint32            )
+    (format       : BitmapImageFormat )
+    : SixLaborsImage =
+    match format with 
+    | R8      ->  ImageL8     <| new Image<L8>     (int width, int height)
+    | RGBA8   ->  ImageRgba32 <| new Image<Rgba32> (int width, int height)
+
+  let toSixLaborsImage
+    (bitmapImage  :  MixerBitmapImage )
+    : SixLaborsImage =
+      bitmapImage.Validate () |> ignore
+
+      match bitmapImage.Format with
+      | BitmapImageFormat.R8    ->
+        ImageL8     <| Image<L8>.LoadPixelData (bitmapImage.Bits, int bitmapImage.Width, int bitmapImage.Height)
+      | BitmapImageFormat.RGBA8 ->
+        ImageRgba32 <| Image<Rgba32>.LoadPixelData (bitmapImage.Bits, int bitmapImage.Width, int bitmapImage.Height)
+
+  let toMixerBitmapImage
+    (sixLaborsImage :  SixLaborsImage)
+    : MixerBitmapImage =
+      let bits, format =
+        match sixLaborsImage with
+        | ImageL8 image ->
+          let bits : byte array = Array.zeroCreate (image.Width*image.Height)
+          image.CopyPixelDataTo bits
+          bits, R8
+        | ImageRgba32 image ->
+          let bits : byte array = Array.zeroCreate (4*image.Width*image.Height)
+          image.CopyPixelDataTo bits
+          bits, RGBA8
+
+      let image = sixLaborsImage.GetImage()
+      {
+        Width     = uint32 image.Width
+        Height    = uint32 image.Height
+        Format    = format
+        Bits      = bits
+      }.Validate ()
+
+  let loadSixLaborsImageFromFile
+    (format       : BitmapImageFormat )
+    (fileName     : string            )
+    : SixLaborsImage =
+    match format with
+    | R8    -> 
+      ImageL8 <| Image.Load<L8> fileName
+    | RGBA8 ->
+      ImageRgba32 <| Image.Load<Rgba32> fileName
+
+  let loadMixerBitmapImageFromFile
     (format       : BitmapImageFormat )
     (fileName     : string            )
     : MixerBitmapImage =
+    use image =  loadSixLaborsImageFromFile format fileName
+    toMixerBitmapImage image
 
-    let image = 
-      match format with
-      | RGBA8 ->
-        use image = Image.Load<Rgba32> fileName
-        let bits : byte array = Array.zeroCreate (4*image.Width*image.Height)
-        image.CopyPixelDataTo bits
-        {
-          Width     = uint32 image.Width
-          Height    = uint32 image.Height
-          Format    = format
-          Bits      = bits
-        }
-      | R8    -> 
-        use image = Image.Load<L8> fileName
-        let bits : byte array = Array.zeroCreate (image.Width*image.Height)
-        image.CopyPixelDataTo bits
-        {
-          Width     = uint32 image.Width
-          Height    = uint32 image.Height
-          Format    = format
-          Bits      = bits
-        }
-    image.Validate ()
-    image
+  let saveSixLaborsImageAsPng 
+    (sixLaborsImage : SixLaborsImage  )
+    (fileName       : string          )
+    : unit =
+    sixLaborsImage.GetImage().SaveAsPng fileName
 
-  let saveAsPng 
+  let saveMixerBitmapImageAsPng 
     (bitmapImage  : MixerBitmapImage)
     (fileName     : string          )
     : unit =
+    use sixLaborsImage = toSixLaborsImage bitmapImage
+    saveSixLaborsImageAsPng sixLaborsImage fileName
 
-    bitmapImage.Validate ()
-
-    match bitmapImage.Format with
-    | RGBA8 ->
-      use image = Image.LoadPixelData<Rgba32> (bitmapImage.Bits, int bitmapImage.Width, int bitmapImage.Height)
-      image.SaveAsPng fileName
-    | R8    -> 
-      use image = Image.LoadPixelData<L8> (bitmapImage.Bits, int bitmapImage.Width, int bitmapImage.Height)
-      image.SaveAsPng fileName
-
-  let createImageL8 width height : Image<L8>=
-    new Image<L8> (width, height)
-
-  let createFontCollection (fontPaths : string array) : Map<string, FontFamily> = 
+  let createFontCollection 
+    (fontPaths : string array) 
+    : Map<string, FontFamily> = 
     let fc = FontCollection ()
     let ra = ResizeArray fontPaths.Length
     for fontPath in fontPaths do
@@ -83,7 +124,20 @@ module ImageIO =
       ra.Add (ff.Name, ff)
     ra |> Map.ofSeq
 
-  let renderText (image : Image<L8>) (font : Font) x y (text : string) : unit =
+  let renderCenteredText 
+    (sixLaborsImage : SixLaborsImage) 
+    (font           : Font          ) 
+    (n              : int           ) 
+    (ny             : int           )
+    (text           : string        ) 
+    : unit =
+    let image   = sixLaborsImage.GetImage ()
+    let options = TextOptions font
+    let size    = TextMeasurer.MeasureSize (text, options)
+    let x       = (float32 image.Width - size.Width)*0.5F
+    let h       = (float32 image.Height/float32 ny)
+    let y       = h*float32 n
+    let y       = y + (h - size.Height)*0.5F
     let mutator (ctx : IImageProcessingContext) = 
-      ignore <| ctx.DrawText (text, font, Pens.Solid Color.White, PointF (x, y))
+      ignore <| ctx.DrawText (text, font, Brushes.Solid Color.White, PointF (x, y))
     image.Mutate mutator

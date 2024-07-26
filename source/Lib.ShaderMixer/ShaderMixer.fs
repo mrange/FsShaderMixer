@@ -33,8 +33,8 @@ open FSharp.Core.Printf
 open MixerLog
 
 type BitmapImageFormat =
-  | RGBA8
   | R8
+  | RGBA8
 
 type MixerBitmapImage =
   {
@@ -49,9 +49,11 @@ type MixerBitmapImage =
     | RGBA8 -> 4u
     | R8    -> 1u
 
-  member x.Validate () =
+  member x.Validate () : MixerBitmapImage =
     if x.Width*x.Height*x.PixelByteSize () <> uint32 x.Bits.Length then
       failwithf "BitmapImage dimensions don't match the bits"
+    else
+      x
 
 type BitmapImageID  = BitmapImageID of string
 type PresenterID    = PresenterID   of string
@@ -494,7 +496,7 @@ module Mixer =
       (mixerBitmapImage : MixerBitmapImage)
       : OpenGLTexture =
 
-      mixerBitmapImage.Validate ()
+      mixerBitmapImage.Validate () |> ignore
 
       let texture =
         {
@@ -1129,21 +1131,17 @@ module Mixer =
   open Internals
 
   let toOpacityMask (bitMapImage : MixerBitmapImage) : MixerBitmapImage =
-    bitMapImage.Validate ()
+    bitMapImage.Validate () |> ignore
     match bitMapImage.Format with
     | RGBA8 ->
       let bits = Array.create (int (bitMapImage.Width*bitMapImage.Height)) 0uy
 
       Loops.toOpacityMask bitMapImage.Bits bits 3 0
 
-      let mbi =
-        { bitMapImage with
-            Format    = R8
-            Bits      = bits
-        }
-      mbi.Validate ()
-
-      mbi
+      { bitMapImage with
+          Format    = R8
+          Bits      = bits
+      }.Validate ()
     | R8    -> bitMapImage
 
   let setupOpenGLMixer

@@ -31,22 +31,25 @@ module Setup =
     let fontCollection  = 
       ImageIO.createFontCollection 
         [|
-          @"D:\assets\gravedigger.ttf"
+          @"D:\assets\PermanentMarker-Regular.ttf"
         |]
-    let fontFamily  = fontCollection.["GRAVEDIGGER PERSONAL USE"]
-    let font        = fontFamily.CreateFont (4.F*96.F)
+    let fontFamily  = fontCollection.["Permanent Marker"]
+    let font        = fontFamily.CreateFont (128.F)
 
-    use textImage = ImageIO.createImageL8 1024 1024
+    use textImage = ImageIO.createSixLaborsImage 1024u 1024u R8
     
-    ImageIO.renderText textImage font 0.F 0.F "Hello"
+    ImageIO.renderCenteredText textImage font 0 4 "Jez"
+    ImageIO.renderCenteredText textImage font 1 4 "Glimglam"
+    ImageIO.renderCenteredText textImage font 2 4 "Lance"
+    ImageIO.renderCenteredText textImage font 3 4 "Longshot"
 
-    textImage.SaveAsPng @"D:\assets\text.png"
+    ImageIO.saveSixLaborsImageAsPng textImage @"D:\assets\text.png"
 
     let gravitySucksID  = SceneID "gravitySucks"
     let gravitySucks    = basicScene ShaderSources.gravitySucks
 
-    let crewID          = BitmapImageID         "crew"
-    let crew            = ImageIO.loadFromFile  R8 @"D:\assets\impulse-members-distance.png"
+    let crewID          = BitmapImageID "crew"
+    let crew            = ImageIO.loadMixerBitmapImageFromFile R8 @"D:\assets\impulse-members-distance.png"
 
     let imageID         = SceneID "image"
     let image           = basicScene ShaderSources.image
