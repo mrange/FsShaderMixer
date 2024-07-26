@@ -43,6 +43,16 @@ module Setup =
     ImageIO.renderCenteredText textImage font 2 4 "Lance"
     ImageIO.renderCenteredText textImage font 3 4 "Longshot"
 
+    let textBitmap = ImageIO.toMixerBitmapImage textImage
+    let distanceBitmap = 
+      DistanceField.createDistanceField 
+        128
+        0.25
+        0
+        textBitmap
+    let distanceImage = ImageIO.toSixLaborsImage distanceBitmap
+    ImageIO.resizeInplaceSixLaborsImage distanceImage 256u 256u
+    ImageIO.saveSixLaborsImageAsPng distanceImage @"D:\assets\distance.png"
     ImageIO.saveSixLaborsImageAsPng textImage @"D:\assets\text.png"
 
     let gravitySucksID  = SceneID "gravitySucks"

@@ -114,6 +114,20 @@ module ImageIO =
     use sixLaborsImage = toSixLaborsImage bitmapImage
     saveSixLaborsImageAsPng sixLaborsImage fileName
 
+  let resizeInplaceSixLaborsImage
+    (sixLaborsImage : SixLaborsImage  )
+    (width          : uint32          )
+    (height         : uint32          )
+    : unit =
+    let mutator (ctx : IImageProcessingContext) = 
+      let options = ResizeOptions (
+          Mode    = ResizeMode.Max
+        , Sampler = KnownResamplers.Hermite
+        , Size    = Size(int width, int height)
+        )
+      ignore <| ctx.Resize options
+    sixLaborsImage.GetImage().Mutate mutator
+
   let createFontCollection 
     (fontPaths : string array) 
     : Map<string, FontFamily> = 
