@@ -34,26 +34,24 @@ module Setup =
           @"D:\assets\PermanentMarker-Regular.ttf"
         |]
     let fontFamily  = fontCollection.["Permanent Marker"]
-    let font        = fontFamily.CreateFont (128.F)
 
-    use textImage = ImageIO.createSixLaborsImage 1024u 1024u R8
-    
-    ImageIO.renderCenteredText textImage font 0 4 "Jez"
-    ImageIO.renderCenteredText textImage font 1 4 "Glimglam"
-    ImageIO.renderCenteredText textImage font 2 4 "Lance"
-    ImageIO.renderCenteredText textImage font 3 4 "Longshot"
-
-    let textBitmap = ImageIO.toMixerBitmapImage textImage
-    let distanceBitmap = 
-      DistanceField.createDistanceField 
-        128
+    let textBitmap = 
+      ImageIO.createTextDistanceFieldAsMixerBitmapImage
+        4u
+        256u
+        256u
+        32u
         0.25
-        0
-        textBitmap
-    let distanceImage = ImageIO.toSixLaborsImage distanceBitmap
-    ImageIO.resizeInplaceSixLaborsImage distanceImage 256u 256u
-    ImageIO.saveSixLaborsImageAsPng distanceImage @"D:\assets\distance.png"
-    ImageIO.saveSixLaborsImageAsPng textImage @"D:\assets\text.png"
+        32.F
+        fontFamily
+        [|
+          "Impulse"
+          "Jez"
+          "Glimglam"
+          "Lance"
+          "Longshot"
+        |]
+    ImageIO.saveMixerBitmapImageAsPng textBitmap @"D:\assets\new_distance.png"
 
     let gravitySucksID  = SceneID "gravitySucks"
     let gravitySucks    = basicScene ShaderSources.gravitySucks
@@ -75,25 +73,27 @@ module Setup =
       [|
         crewID, crew
       |] |> Map.ofArray
-    
-    {
-      NamedBitmapImages = images
-      NamedPresenters   = defaultPresenters
-      NamedScenes       =
+
+    let namedScenes = 
         [|
           blackSceneID    , blackScene
           redSceneID      , redScene
           gravitySucksID  , gravitySucks
           imageID         , image
         |] |> Map.ofArray
-      BPM           = 142.F
-      LengthInBeats = 576
+
+    {
+      NamedBitmapImages = images
+      NamedPresenters   = defaultPresenters
+      NamedScenes       = namedScenes
+      BPM               = 142.F
+      LengthInBeats     = 576
 
       InitialPresenter  = faderPresenterID
       InitialStage0     = blackSceneID
       InitialStage1     = gravitySucksID
 
-      Script        =
+      Script            =
         [|
           0   , ApplyFader  <| fadeToStage1 4.F
         |]

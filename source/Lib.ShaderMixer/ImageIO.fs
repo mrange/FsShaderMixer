@@ -23,8 +23,8 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 
 type SixLaborsImage =
-  | ImageL8      of Image<L8>
-  | ImageRgba32  of Image<Rgba32>
+  | ImageL8      of L8      Image
+  | ImageRgba32  of Rgba32  Image
 
   interface IDisposable with
     member x.Dispose () : unit =
@@ -155,3 +155,46 @@ module ImageIO =
     let mutator (ctx : IImageProcessingContext) = 
       ignore <| ctx.DrawText (text, font, Brushes.Solid Color.White, PointF (x, y))
     image.Mutate mutator
+
+  let createTextDistanceFieldAsMixerBitmapImage 
+    (upScale        : uint32        )
+    (width          : uint32        )
+    (height         : uint32        )
+    (radius         : uint32        )
+    (cutOff         : float         )
+    (fontSize       : float32       )
+    (fontFamily     : FontFamily    )
+    (texts          : string array  ) 
+    : MixerBitmapImage =
+      let upScale   = OpenGLMath.clamp upScale 1u 32u
+      let uwidth    = upScale*width
+      let uheight   = upScale*height
+      let ufontSize = float32 upScale*fontSize
+      let uradius   = upScale*radius
+      let font      = fontFamily.CreateFont ufontSize
+      let image     = createSixLaborsImage uwidth uheight BitmapImageFormat.R8
+
+      let rec loop i =
+        if i < texts.Length then
+          renderCenteredText 
+            image
+            font
+            i
+            texts.Length
+            texts.[i]
+          loop (i + 1)
+      loop 0
+
+      let bitmapImage     = toMixerBitmapImage image
+      let distanceBitmap  = 
+        DistanceField.createDistanceField 
+          (int uradius)
+          cutOff
+          0
+          bitmapImage
+
+      let distanceImage   = toSixLaborsImage distanceBitmap
+      
+      resizeInplaceSixLaborsImage distanceImage width height
+
+      toMixerBitmapImage distanceImage
