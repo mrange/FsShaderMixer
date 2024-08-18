@@ -4,9 +4,9 @@
     "net8.0": {
       "FSharp.Core": {
         "type": "Direct",
-        "requested": "[8.0.301, )",
-        "resolved": "8.0.301",
-        "contentHash": "I94+2zfAhWMJwPzVDFSlsutZvjPkaRvLVipf8b2O4AyzxKUBmevDkUBzcJBqSQNB1Ikig8xdphswoeKrObqx7Q=="
+        "requested": "[9.0.100-beta.24406.3, )",
+        "resolved": "9.0.100-beta.24406.3",
+        "contentHash": "w3q+hTyiwyVHPvq3mAvlCWj1LUsP3kWmmpnX/VOOAaC8SKeeGLBFbBks7NWnnZ35Qn2YgNyDEHP5f7LEkdMFWA=="
       },
       "ImGui.NET": {
         "type": "Direct",
@@ -61,6 +61,15 @@
         "dependencies": {
           "Silk.NET.Windowing.Common": "2.21.0",
           "Silk.NET.Windowing.Glfw": "2.21.0"
+        }
+      },
+      "System.Text.Json": {
+        "type": "Direct",
+        "requested": "[8.0.4, )",
+        "resolved": "8.0.4",
+        "contentHash": "bAkhgDJ88XTsqczoxEMliSrpijKZHhbJQldhAmObj/RbrN3sU5dcokuXmWJWsdQAhiMJ9bTayWsL1C9fbbCRhw==",
+        "dependencies": {
+          "System.Text.Encodings.Web": "8.0.0"
         }
       },
       "Microsoft.CSharp": {
@@ -239,14 +248,6 @@
         "resolved": "8.0.0",
         "contentHash": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ=="
       },
-      "System.Text.Json": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "OdrZO2WjkiEG6ajEFRABTRCi/wuXQPxeV6g8xvUJqdxMvvuCCEk86zPla8UiIQJz3durtUEbNyY/3lIhS0yZvQ==",
-        "dependencies": {
-          "System.Text.Encodings.Web": "8.0.0"
-        }
-      },
       "Ultz.Native.GLFW": {
         "type": "Transitive",
         "resolved": "3.4.0",
@@ -260,13 +261,14 @@
       "lib.shadermixer": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[8.0.301, )",
+          "FSharp.Core": "[9.0.100-beta.24406.3, )",
           "NAudio.Core": "[2.2.1, )",
           "Silk.NET.OpenAL": "[2.21.0, )",
           "Silk.NET.OpenGL": "[2.21.0, )",
           "SixLabors.Fonts": "[2.0.4, )",
           "SixLabors.ImageSharp": "[3.1.5, )",
-          "SixLabors.ImageSharp.Drawing": "[2.1.4, )"
+          "SixLabors.ImageSharp.Drawing": "[2.1.4, )",
+          "System.Text.Json": "[8.0.4, )"
         }
       }
     }

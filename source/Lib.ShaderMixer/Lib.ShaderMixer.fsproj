@@ -24,6 +24,7 @@
     <Compile Include="Scripting.fs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
     <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />
     <PackageReference Include="Silk.NET.OpenAL" Version="2.21.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />

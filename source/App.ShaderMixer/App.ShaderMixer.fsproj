@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
     <PackageReference Include="ImGui.NET" Version="1.89.9.4" />
     <PackageReference Include="Silk.NET.Input" Version="2.21.0" />
     <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />

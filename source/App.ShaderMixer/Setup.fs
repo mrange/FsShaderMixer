@@ -25,7 +25,7 @@ module Setup =
   open Scripting
 
   let createAudioMixer () : AudioMixer =
-    AudioIO.loadFromWavFile @"D:\assets\virgill_-_hyperbased_-_omg_its_a_cube_-_amigaremix_02106.wav"
+    AudioIO.loadFromWavFile @"D:\assets\astroboy--my-head-is-spiritualism.wav"
 
   let createMixer () : Mixer =
     let fontCollection  = 
@@ -86,8 +86,8 @@ module Setup =
       NamedBitmapImages = images
       NamedPresenters   = defaultPresenters
       NamedScenes       = namedScenes
-      BPM               = 142.F
-      LengthInBeats     = 576
+      BPM               = 145.F
+      LengthInBeats     = 530
 
       InitialPresenter  = faderPresenterID
       InitialStage0     = blackSceneID
